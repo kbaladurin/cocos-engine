@@ -201,6 +201,11 @@ bool jsb_register_all_modules() {
 #if CC_USE_SOCKET && CC_USE_WEBSOCKET_SERVER
     se->addRegisterCallback(register_all_websocket_server);
 #endif
+
+#if CC_USE_ETS
+
+#endif
+
     se->addAfterCleanupHook([]() {
         cc::DeferredReleasePool::clear();
         JSBClassType::cleanup();

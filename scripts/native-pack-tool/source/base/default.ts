@@ -152,7 +152,7 @@ export abstract class NativePackTool {
     }
 
     /**
-     * Read package.json file in the root folder and return the version field. 
+     * Read package.json file in the root folder and return the version field.
      */
     protected tryGetEngineVersion(): string | null {
         const pkgJSON = ps.join(Paths.enginePath, 'package.json');
@@ -213,7 +213,7 @@ export abstract class NativePackTool {
 
             if(!compFile(srcFile, dstFile)) {
                 console.log(`File ${dstFile} differs from ${srcFile}`);
-                return false;   
+                return false;
             }
         }
         return true;
@@ -221,7 +221,7 @@ export abstract class NativePackTool {
 
     private skipVersionCheck = false;
     /**
-     * The engine version used to generate the 'native/' folder should match the 
+     * The engine version used to generate the 'native/' folder should match the
      * condition written in the 'compatibility-info.json' file.
      */
     private validateTemplateVersion(): boolean {
@@ -435,7 +435,7 @@ export abstract class NativePackTool {
 
     /**
      * 加密脚本，加密后，会修改 cmake 参数，因而需要再次执行 cmake 配置文件的生成
-     * @returns 
+     * @returns
      */
     protected async encrypteScripts() {
         if (!this.params.encrypted) {
@@ -500,7 +500,7 @@ export abstract class NativePackTool {
     run?(): Promise<boolean>;
 }
 
-// cocos.compile.json 
+// cocos.compile.json
 export class CocosParams<T> {
     platformParams!: T | any;
     public debug: boolean;

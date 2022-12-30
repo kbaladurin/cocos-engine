@@ -29,6 +29,8 @@ export class OpenHarmonyPackTool extends NativePackTool {
     }
 
     async create() {
+        this.updateCMakeConfig();
+
         await this.copyCommonTemplate();
         await this.copyPlatformTemplate();
         await this.generateCMakeConfig();
@@ -212,6 +214,16 @@ export class OpenHarmonyPackTool extends NativePackTool {
             }
         }
         return rs;
+    }
+
+    private updateCMakeConfig() : void {
+        const keys = ['USE_ETS', 'ARK_ROOT', 'ARK_BUILD_ROOT'];
+        for (const key of keys) {
+            const value = process.env[`COCOS_${key}`];
+            if (process.env[`COCOS_${key}`]) {
+                this.params.cMakeConfig[key] = `set(${key} ${value})`;
+            }
+        }
     }
 }
 

@@ -37,6 +37,7 @@ cc_set_if_undefined(USE_GEOMETRY_RENDERER    ON)
 cc_set_if_undefined(USE_WEBP                 ON)
 cc_set_if_undefined(NET_MODE                  0) # 0 is client
 cc_set_if_undefined(USE_REMOTE_LOG           OFF)
+cc_set_if_undefined(USE_ETS                  OFF)
 
 
 if(ANDROID AND NOT DEFINED USE_CCACHE)
@@ -168,6 +169,7 @@ if(CI_FORCE_MINIMAL_FEATURES)
     set(USE_DEBUG_RENDERER OFF)
     set(USE_GEOMETRY_RENDERER OFF)
     set(USE_WEBP OFF)
+    set(USE_ETS OFF)
 endif()
 
 ################################# external source code ################################
@@ -2566,6 +2568,14 @@ elseif(LINUX)
     )
 endif()
 
+if (USE_ETS)
+cocos_source_files(
+    cocos/bindings/manual/jsb_platform_ohos.cpp
+    cocos/bindings/manual/JavaScriptJavaBridge.cpp
+    cocos/bindings/manual/JavaScriptJavaBridge.h
+)
+endif
+
 ############# module bindings
 cocos_source_files(MODULE ccbindings
     cocos/bindings/sebind/intl/common.h
@@ -3008,6 +3018,7 @@ function(cc_apply_definations target)
         $<IF:$<BOOL:${USE_DEBUG_RENDERER}>,CC_USE_DEBUG_RENDERER=1,CC_USE_DEBUG_RENDERER=0>
         $<IF:$<BOOL:${USE_GEOMETRY_RENDERER}>,CC_USE_GEOMETRY_RENDERER=1,CC_USE_GEOMETRY_RENDERER=0>
         $<IF:$<BOOL:${USE_WEBP}>,CC_USE_WEBP=1,CC_USE_WEBP=0>
+        $<IF:$<BOOL:${USE_ETS}>,CC_USE_ETS=1,CC_USE_ETS=0>
         $<IF:$<BOOL:${CC_EDITOR}>,CC_EDITOR=1,CC_EDITOR=0>
         $<$<BOOL:${USE_REMOTE_LOG}>:CC_REMOTE_LOG=1>
         $<$<BOOL:${USE_SE_SM}>:SCRIPT_ENGINE_TYPE=1>

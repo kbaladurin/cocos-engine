@@ -32,6 +32,12 @@
 
 #include <regex>
 
+#if CC_USE_ETS
+#include <plugins/ets/runtime/ets_vm_api.h>
+#include <plugins/ets/runtime/ts2ets/ts2ets.h>
+#include <sstream>
+#endif
+
 using namespace cc;
 
 static std::unordered_map<std::string, std::string> _fontFamilyNameMap;
@@ -46,7 +52,75 @@ static bool JSB_loadFont(se::State &s) {
 }
 SE_BIND_FUNC(JSB_loadFont)
 
+#if CC_USE_ETS
+static bool JSB_createEtsRuntime(se::State &s) {
+    const auto &args = s.args();
+    size_t argc = args.size();
+    if (argc != 1) {
+        SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+        return false;
+    }
+
+    bool ok = true;
+    ccstd::string path;
+    ok &= sevalue_to_native(args[0], &path);
+    SE_PRECONDITION2(ok, false, "Error processing arguments");
+
+    std::stringstream stdlib_abc;
+    stdlib_abc << path << "/etsstdlib.abc";
+    std::stringstream path_abc;
+    path_abc << path << "/index.abc";
+
+    panda::ets::CreateRuntime(stdlib_abc.str().c_str(), path_abc.str().c_str(), true, true);
+
+    return true;
+}
+
+static bool JSB_destroyEtsRuntime(se::State &s) {
+    const auto &args = s.args();
+    size_t argc = args.size();
+    if (argc != 0) {
+        SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+        return false;
+    }
+
+    panda::ets::ExecuteMain();
+    return true;
+}
+
+static bool JSB_executeEtsMain() {
+    const auto &args = s.args();
+    size_t argc = args.size();
+    if (argc != 0) {
+        SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+        return false;
+    }
+
+    panda::ets::ExecuteMain();
+    return true;
+}
+
+static napi_value _SE(JSB_invokeEtsMethod)(napi_env env, napi_callback_info info) {
+    size_t argc = 0;
+    napi_status status;
+    NODE_API_CALL(status, env, napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
+
+    std::vector<napi_value> args(argc);
+    NODE_API_CALL(status, env, napi_get_cb_info(env, info, &argc, args.data(), nullptr, nullptr));
+
+    return InvokeEtsMethodImpl(env, args.data(), args.size(), false);
+}
+
+#endif
+
 bool register_platform_bindings(se::Object *obj) {
     __jsbObj->defineFunction("loadFont", _SE(JSB_loadFont));
+
+#if CC_USE_ETS
+    __jsbObj->defineFunction("createEtsRuntime", _SE(JSB_createEtsRuntime));
+    __jsbObj->defineFunction("destroyEtsRuntime", _SE(JSB_destroyEtsRuntime));
+    __jsbObj->defineFunction("executeEtsMain", _SE(JSB_executeEtsMain));
+    __jsbObj->defineFunction("invokeEtsMethod", _SE(JSB_invokeEtsMethod));
+#endif
     return true;
 }
